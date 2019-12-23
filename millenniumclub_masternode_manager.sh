@@ -4,7 +4,7 @@
 #########################################################################################################
 # Creator: Eddy Erkel                                                                                   #
 # Discord: Eddy#6547                                                                                    #
-# Date   : October, 2019                                                                                #
+# Date   : December, 2019                                                                                #
 # Github : https://github.com/EddyErkel/                                                                #
 #                                                                                                       #
 # Disclamer:                                                                                            #
@@ -29,7 +29,6 @@
 # https://github.com/neo3587/dupmn                                                                      #
 #                                                                                                       #
 # To do someday maybe:                                                                                  #
-# - add alias to mn.conf file                                                                           #
 # - remove option                                                                                       #
 # - version check via diff                                                                              #
 # - add multiple binaries versions for Ubuntu 16, 18 19                                                 #
@@ -40,7 +39,7 @@
 
 
 # Script version (script/coin)
-VERSION=0.1
+VERSION=0.2
 
 
 # Donation addresses
