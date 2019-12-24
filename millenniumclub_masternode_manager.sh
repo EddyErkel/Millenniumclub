@@ -39,7 +39,7 @@
 
 
 # Script version (script/coin)
-VERSION=0.2
+VERSION=0.3
 
 
 # Donation addresses
@@ -71,7 +71,7 @@ COIN_SERVICE="millenniumclubcoin.service"
 COIN_PORT="3333"
 RPC_PORT="33331"
 KEY_DUMMY="ReplaceThisDummyPrivateKeyByAManuallyGeneratedPrivateKey"                                # Dummy private key, will be assigned if a private key can not be generated.
-OSVERSIONS=(16.04)                                                                                  # Preferred Ubuntu OS version(s) (separate by spaces, e.g. 16.04 18.04).
+OSVERSIONS=(16.04 18.04)                                                                            # Preferred Ubuntu OS version(s) (separate by spaces, e.g. 16.04 18.04).
 
 
 # Masternode commands
@@ -83,8 +83,8 @@ MNCLI_SYNC="mnsync status"                                                      
 
 
 # Masternode binaries URL
-COIN_URL="https://github.com/dehaebbede/mclb/raw/master/mclb-ubuntu16.zip"                          # Binaries compressed file.
-#COIN_URL="https://github.com/dehaebbede/mclb/raw/master/mclb-ubuntu18.zip"
+COIN_URL16="https://github.com/dehaebbede/mclb/raw/master/mclb-ubuntu16.zip"                        # Binaries compressed file for Ubuntu 16.
+COIN_URL18="https://github.com/dehaebbede/mclb/raw/master/mclb-ubuntu18.zip"                        # Binaries compressed file for Ubuntu 18.
 COIN_ZIPDIR="/"                                                                                     # Path inside the zipfile that contains the binaries.
 
 
@@ -314,13 +314,22 @@ function checks() {
     for OS in ${OSVERSIONS[@]}; do
         if [[ $(lsb_release -rs) == $OS ]]; then
             PREFOS="true"
+            RELEASE=$(lsb_release -rs | awk -F. '{print $1}')
+            case $RELEASE in
+                16)
+                    COIN_URL=$COIN_URL16
+                    ;;
+                18)
+                    COIN_URL=$COIN_URL18
+                    ;;
+            esac
         fi
     done
     
     if [[ $PREFOS == "false" ]]; then
         echo -e "[${R}FAILED${D}] You running Ubuntu $(lsb_release -rs) which is not a preferred OS version (${OSVERSIONS[*]}).${N}"
     else
-        echo -e "${D}[${G}  OK  ${D}] You are running a preferred Ubuntu OS.${N}"
+        echo -e "${D}[${G}  OK  ${D}] You are running a preferred Ubuntu OS version (${OS}).${N}"
     fi
     
     echo
@@ -719,7 +728,7 @@ function add_alias() {
     echo
     echo
     echo  
-    echo -e "${G}ADD ALIAS TO MASTERNODE CONFIGURATION FILE{N}"
+    echo -e "${G}ADD ALIAS TO MASTERNODE CONFIGURATION FILE${N}"
     echo
     echo -e "${D}For easy recognition add an alias to the masternode configuration file.${N}"
     echo
@@ -1836,7 +1845,7 @@ function install_additional_node () {
         dupmn install $COIN_NAME --bootstrap --privkey=$COINKEY
         EXITCODE="$?"
 
-        if [ $MOVE == yes ]; then
+        if [[ $MOVE == yes ]]; then
             echo
             echo -e "${D}Moving bootstrap to its original location...${N}"
             echo
@@ -1941,7 +1950,7 @@ function dupmn_summary() {
     echo -e "${D}- Start all masternodes     : ${C}$DUPMN_NAME systemctlall $COIN_NAME start${N}"
     echo -e "${D}- Stop all masternodes      : ${C}$DUPMN_NAME systemctlall $COIN_NAME stop${N}"
     echo -e "${D}- Status for all mn services: ${C}$DUPMN_NAME systemctlall $COIN_NAME status${N}"
-    echo -e "${D}- Show all masternode status: ${C}prx-cli-all $MNCLI_STATUS${N}"
+    echo -e "${D}- Show all masternode status: ${C}${COIN_CLI}-all $MNCLI_STATUS${N}"
     echo
     echo -e "${D}Dupmn related websites:${N}"
     if [ ! -z "$WWW_DUPMN"   ]; then echo -e "${D}- Dupmn website             : ${Y}$WWW_DUPMN${N}"  ; fi 
