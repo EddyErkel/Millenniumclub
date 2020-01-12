@@ -4,7 +4,7 @@
 #########################################################################################################
 # Creator: Eddy Erkel                                                                                   #
 # Discord: Eddy#6547                                                                                    #
-# Date   : December, 2019                                                                                #
+# Date   : Januari, 2020                                                                                #
 # Github : https://github.com/EddyErkel/                                                                #
 #                                                                                                       #
 # Disclamer:                                                                                            #
@@ -30,8 +30,7 @@
 #                                                                                                       #
 # To do someday maybe:                                                                                  #
 # - remove option                                                                                       #
-# - version check via diff                                                                              #
-# - add multiple binaries versions for Ubuntu 16, 18 19                                                 #
+# - version check                                                                                       #
 #                                                                                                       #
 #########################################################################################################
 #                                    MASTERNODE MANAGER                                                 #
@@ -39,7 +38,7 @@
 
 
 # Script version (script/coin)
-VERSION=0.3
+VERSION=0.4
 
 
 # Donation addresses
@@ -50,6 +49,7 @@ DONADDR1="MCLB: mbNck1MdshduJD1TLGc7Cp6MHtHy8HRPi8"
 DONADDR2="BTC : 18JNWyGhfAmhkWs7jzuuHn54jEZRPj81Jx"
 DONADDR3="ETH : 0x067e8b995f7dbaf32081bc32927f6fac29b32055"
 DONADDR4="LTC : LLqwyRiKiuvxkx76grFmbxEeoChLnxvaKH"
+
 
 
 #########################################################################################################
@@ -89,23 +89,24 @@ COIN_ZIPDIR="/"                                                                 
 
 
 # Masternode Bootstrap URL
-CHAIN_URL="https://github.com/dehaebbede/mclb/raw/master/mclb-bootstrap.zip"                        # Bootstrap compressed file containing chain directory's.
+#CHAIN_URL="https://github.com/dehaebbede/mclb/raw/master/mclb-bootstrap.zip"                       # Bootstrap compressed file containing chain directory's.
 CHAIN_DATA="blocks chainstate peers.dat"                                                            # Folders and files used for creating bootstrap.zip (separate by spaces, usually blocks chainstate peers.dat). 
                                                                                                     # These folders and files will also be deleted when installing bootstrap.  
 
 # Masternode Addnodes URL
-NODES_URL="https://github.com/dehaebbede/mclb/raw/master/addnodes.txt"                              # Addnodes.txt file.
+#NODES_URL="https://github.com/dehaebbede/mclb/raw/master/addnodes.txt"                             # Addnodes.txt file.
 
 
 # Masternode related website URLs (shown at installation summary)
-WWW_MAIN="https://www.millenniumclub.ca/"                                                           # Main website URL
-WWW_GHUB="https://github.com/millenniumclub/MCLB"                                                   # Github URL
-WWW_EXPL="http://173.212.243.89:3001/"                                                              # Explorer URL
-#WWW_MNO="https://www.mnroi.info/coin/MILL"                                                          # Masternodes.Online URL
-#WWW_CMC="https://coinmarketcap.com/coins/"                                                          # CoinMarketCap URL
+WWW_MAIN="https://www.millenniumclub.ca/"                                                           # Main website URL.
+WWW_GHUB="https://github.com/millenniumclub/MCLB"                                                   # Github URL.
+WWW_EXPL="http://explore.millenniumclub.ca:3001/"                                                   # Explorer URL.
+#WWW_MNO="https://www.mnroi.info/coin/MCLB"                                                         # Masternodes.Online URL.
+#WWW_CMC="https://coinmarketcap.com/coins/"                                                         # CoinMarketCap URL.
 
 
 # Dupmn variables
+DUPMN_ENABLE="false"                                                                                # Enable/Disable dupmn. Disable:false, enable:true.
 DUPMN_NAME="dupmn"
 DUPMN_EXEC="/usr/bin/dupmn"
 DUPMN_CONFIG="/root/.dupmn/dupmn.conf"
@@ -121,10 +122,10 @@ WWW_DUPMN3="https://github.com/neo3587/dupmn/wiki/Commands"
 
 
 # Get file names from URLs
-COIN_ZIP=$(echo $COIN_URL | awk -F'/' '{print $NF}')
 CHAIN_ZIP=$(echo $CHAIN_URL | awk -F'/' '{print $NF}')
 NODES_TXT=$(echo $NODES_URL | awk -F'/' '{print $NF}')
 DUPMN_SH=$(echo $DUPMN_URL | awk -F'/' '{print $NF}')
+
 
 
 #########################################################################################################
@@ -137,12 +138,12 @@ DUPMN_SH=$(echo $DUPMN_URL | awk -F'/' '{print $NF}')
 function display_logo() {
     if [ ! -z $1 ]; then DELAY=$1; else DELAY=0.04; fi
     echo -e "                                                                               ${N}"; sleep $DELAY
-    echo -e "   __  __ _ _ _                  _                    _____ _       _          ${N}"; sleep $DELAY
-    echo -e "  |  \/  (_) | |                (_)                  / ____| |     | |         ${N}"; sleep $DELAY
-    echo -e "  | \  / |_| | | ___ _ __  _ __  _ _   _ _ __ ___   | |    | |_   _| |__       ${N}"; sleep $DELAY
-    echo -e "  | |\/| | | | |/ _ \ \_ \| \_ \| | | | | \_ \ _ \  | |    | | | | | \_ \      ${N}"; sleep $DELAY
-    echo -e "  | |  | | | | |  __/ | | | | | | | |_| | | | | | | | |____| | |_| | |_) |     ${N}"; sleep $DELAY
-    echo -e "  |_|  |_|_|_|_|\___|_| |_|_| |_|_|\__,_|_| |_| |_|  \_____|_|\__,_|_.__/      ${N}"; sleep $DELAY
+    echo -e "     __  __ _ _ _                  _                    _____ _       _        ${N}"; sleep $DELAY
+    echo -e "    |  \/  (_) | |                (_)                  / ____| |     | |       ${N}"; sleep $DELAY
+    echo -e "    | \  / |_| | | ___ _ __  _ __  _ _   _ _ __ ___   | |    | |_   _| |__     ${N}"; sleep $DELAY
+    echo -e "    | |\/| | | | |/ _ \ \_ \| \_ \| | | | | \_ \ _ \  | |    | | | | | \_ \    ${N}"; sleep $DELAY
+    echo -e "    | |  | | | | |  __/ | | | | | | | |_| | | | | | | | |____| | |_| | |_) |   ${N}"; sleep $DELAY
+    echo -e "    |_|  |_|_|_|_|\___|_| |_|_| |_|_|\__,_|_| |_| |_|  \_____|_|\__,_|_.__/    ${N}"; sleep $DELAY
     echo -e "                                                                               ${N}"; sleep $DELAY
     echo -e "                The Millennium Club was built for the porpose of               ${N}"; sleep $DELAY
     echo -e "                  reviving those projects with great potential                 ${N}"; sleep $DELAY
@@ -150,7 +151,6 @@ function display_logo() {
     echo -e "                                                                               ${N}"; sleep $DELAY
     echo -e "───────────────────────────────────────────────────────────────────────────────${N}"; sleep $DELAY
 }
-
 
 
 # Display disclaimer
@@ -186,6 +186,7 @@ function display_disclaimer() {
         fi
     fi
 }
+
 
 
 #########################################################################################################
@@ -251,15 +252,17 @@ function clear_screen() {
 # Display help
 function display_help() {
     if [[ ! "$1" == "noheader" ]] ; then
-        echo -e "${G}                          ${NODE_NAME^^} MASTERNODE MANAGER${N}"        
+        echo -e "${G}                      ${NODE_NAME^^} MASTERNODE MANAGER${N}"        
         echo -e "${D}───────────────────────────────────────────────────────────────────────────────${N}"
         echo
         echo -e "${G}This script will guide you through the installation, configuration${N}"
         echo -e "${G}and management of your $NODE_NAME masternode${N}."
-        echo 
-        echo -e "${Y}To install and manage additional $NODE_NAME masternodes this script${N}"     
-        echo -e "${Y}will install and configure dupmn for $NODE_NAME when required.${N}" 
-        echo
+        if [[ $DUPMN_ENABLE == "true" ]]; then
+            echo 
+            echo -e "${Y}To install and manage additional $NODE_NAME masternodes this script${N}"     
+            echo -e "${Y}will install and configure dupmn for $NODE_NAME when required.${N}" 
+            echo
+        fi
     fi
     echo
 	echo -e "${D}Usage: $SCRIPT_NAME ${C}<option> [parameters]${N}"
@@ -268,6 +271,7 @@ function display_help() {
     echo -e "${D}$SCRIPT_NAME ${C}summary           ${D}: Display $NODE_NAME main masternode installation summary${N}"
     echo -e "${D}$SCRIPT_NAME ${C}help              ${D}: Display this help text${N}"
     echo -e "${D}$SCRIPT_NAME ${C}update            ${D}: Update $NODE_NAME binaries${N}"
+    echo -e "${D}$SCRIPT_NAME ${C}addnodes          ${D}: Add/replace addnode list in $COIN_CONFIG${N}"  
     echo -e "${D}$SCRIPT_NAME ${C}bootstrap         ${D}: Download and install $NODE_NAME bootstrap${N}"
     echo -e "${D}$SCRIPT_NAME ${C}createbootstrap   ${D}: Create $NODE_NAME bootstrap (from installed masternode)${N}"
     echo -e "${D}$SCRIPT_NAME ${C}stop              ${D}: Stop $NODE_NAME masternode${N}"
@@ -277,13 +281,40 @@ function display_help() {
     echo -e "${D}$SCRIPT_NAME ${C}showconf          ${D}: Display contents of $COIN_CONFIG${N}" 
     echo -e "${D}$SCRIPT_NAME ${C}replace strA strB ${D}: Replace 'string A' with 'string B' in $COIN_CONFIG${N}"
     echo -e "${D}$SCRIPT_NAME ${C}createswap        ${D}: Create swap file (not recommended for SSD)${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}dupmn             ${D}: Install or update dupmn${N}"
+    echo -e "${D}$SCRIPT_NAME ${C}optimize          ${D}: Enable SSD optimizations${N}"
+    if [[ $DUPMN_ENABLE == "true" ]]; then
+        echo -e "${D}$SCRIPT_NAME ${C}dupmn             ${D}: Install or update dupmn${N}"
+    fi
     echo -e "${D}$SCRIPT_NAME ${C}disclaimer        ${D}: Display disclaimer${N}"
     echo -e "${D}$SCRIPT_NAME ${C}donation          ${D}: Show donation addresses${N}"
     echo
 }
 
 
+# Check Ubuntu OS version
+function check_os() {
+    PREFOS="false"
+    for OS in ${OSVERSIONS[@]}; do
+        if [[ $(lsb_release -rs) == $OS ]]; then
+            PREFOS="true"
+            RELEASE=$(lsb_release -rs | awk -F. '{print $1}')
+            case $RELEASE in
+                16)
+                    COIN_URL=$COIN_URL16
+                    ;;
+                18)
+                    COIN_URL=$COIN_URL18
+                    ;;
+            esac
+        else 
+            COIN_URL=$COIN_URL16
+        fi
+    done
+    
+    COIN_ZIP=$(echo $COIN_URL | awk -F'/' '{print $NF}')
+}            
+
+        
 # Pre-installation checks
 function checks() {
     echo
@@ -309,25 +340,12 @@ function checks() {
         echo -e "${D}[${G}  OK  ${D}] No $NODE_NAME masternode installed.${N}"
     fi
 
-    # Check Ubuntu version
-    PREFOS="false"
-    for OS in ${OSVERSIONS[@]}; do
-        if [[ $(lsb_release -rs) == $OS ]]; then
-            PREFOS="true"
-            RELEASE=$(lsb_release -rs | awk -F. '{print $1}')
-            case $RELEASE in
-                16)
-                    COIN_URL=$COIN_URL16
-                    ;;
-                18)
-                    COIN_URL=$COIN_URL18
-                    ;;
-            esac
-        fi
-    done
+    # Check Ubuntu OS version
+    check_os
     
     if [[ $PREFOS == "false" ]]; then
-        echo -e "[${R}FAILED${D}] You running Ubuntu $(lsb_release -rs) which is not a preferred OS version (${OSVERSIONS[*]}).${N}"
+        echo -e "[${R}FAILED${D}] You are running Ubuntu $(lsb_release -rs) which is not a preferred OS version (${OSVERSIONS[*]}).${N}"
+        FAILED="1"
     else
         echo -e "${D}[${G}  OK  ${D}] You are running a preferred Ubuntu OS version (${OS}).${N}"
     fi
@@ -339,12 +357,14 @@ function checks() {
     else
         echo -e "${R}One or more pre-installation checks failed.${N}"
         echo
-        echo -e "${D}Do you want to continue the installation anyway (not recommended)? [y/N]${N}"
-        read  -s -n1 SELECTION
+        #if [[ $DUPMN_ENABLE == "true" ]]; then
+            echo -e "${D}Do you want to continue the installation anyway (not recommended)? [y/N]${N}"
+            read  -s -n1 SELECTION
 
-        if [[ $SELECTION == @("N"|"n"|"") ]]; then
-            exit 1
-        fi
+            if [[ $SELECTION == @("N"|"n"|"") ]]; then
+                exit 1
+            fi
+        #fi
     fi
 }
 
@@ -463,7 +483,7 @@ function install_binaries() {
         if [ -f $COIN_PATH/$COIN_DAEMON ]; then
             echo -e "${Y}Masternode binaries installation skipped.${N}"
         else 
-            echo -e "${R}Masternode installation aborted.${N}"
+            echo -e "${Y}Masternode installation aborted.${N}"
             exit 1
         fi
     fi
@@ -486,6 +506,24 @@ function update_binaries() {
 
     if [[ $SELECTION == @("Y"|"y"|"") ]]; then
         echo
+        
+        # Check Ubuntu OS version
+        check_os
+        
+        if [[ $PREFOS == "false" ]]; then
+            echo -e "${R}You are running Ubuntu $(lsb_release -rs) which is not a preferred OS version (${OSVERSIONS[*]}).${N}"
+            echo
+            echo -e "${D}Do you want to continue the installation anyway (not recommended)? [y/N]${N}"
+            read  -s -n1 SELECTION
+
+            if [[ $SELECTION == @("N"|"n"|"") ]]; then
+                echo
+                echo -e "${Y}Masternode binaries update aborted.${N}"
+                echo
+                exit 1
+            fi
+        fi
+        
         if [ -f $SCRIPT_DIR/$COIN_ZIP ]; then
             COIN_ZIP_DATE=$(date -r $COIN_ZIP '+%Y%m%d_%H%M%S')              # Get binaries file date
             mv $SCRIPT_DIR/$COIN_ZIP $SCRIPT_DIR/$COIN_ZIP.$COIN_ZIP_DATE
@@ -546,7 +584,7 @@ function update_binaries() {
         echo
     else
         echo
-        echo -e "${R}Masternode update aborted.${N}"
+        echo -e "${Y}Masternode binaries update aborted.${N}"
         echo
         exit 1
     fi
@@ -638,6 +676,8 @@ function ssd_optimizations() {
     echo  
     echo -e "${G}OPTIMIZATIONS FOR SSD USAGE${N}"
     echo
+    echo -e "${D}This will set swappiness value, disable access time logging and enabe TRIM support.${N}"
+    echo 
     echo -e "${D}Do you want to enable optimizations for SSD usage? (Recommended when using SSD) [Y/n]${N}"
     read -s -n1 SELECTION    
     if [[ $SELECTION == @("Y"|"y"|"") ]]; then
@@ -665,7 +705,7 @@ function ssd_optimizations() {
         echo   
         
         # Disable access time logging
-        echo -e "${D}Disable access time loggin.${N}"
+        echo -e "${D}Disable access time logging.${N}"
         echo
         # Create backup copy of fstab
         echo -e "${D}Backup fstab to /etc/fstab.$FILE_DATE.${N}"
@@ -693,7 +733,7 @@ function ssd_optimizations() {
 }
 
 
-# Create massternode config file
+# Create masternode config file
 function create_config() {
     echo
     echo
@@ -751,13 +791,19 @@ function add_alias() {
       
             # Delete alias (copied by dupmn)
             sed -i '/\#\[.*\]\#/d' $CONFIG
+            # Delete empty lines at beginning of Masternode config file
+            sed -i '/./,$!d' $CONFIG
             # Add new alias
-            sed -i "1i #[${ALIAS}]#" $CONFIG
+            sed -i "1i #[ ${ALIAS} ]#\n" $CONFIG
             echo
-            echo -e "${Y}Masternode alias added to configuration file.${N}"
+            echo -e "${Y}Masternode alias added to configuration file $CONFIG.${N}"
         else
             # Delete alias (copied by dupmn)
             sed -i '/\#\[.*\]\#/d' $CONFIG
+            # Delete empty lines at beginning of Masternode config file
+            sed -i '/./,$!d' $CONFIG
+            echo 
+            echo -e "${Y}Masternode alias deleted from configuration file $CONFIG.${N}"
         fi
     else
         echo
@@ -807,124 +853,126 @@ function install_bootstrap() {
         DOWNLOAD="yes"
     fi
     
-        
-    if [[ "$DOWNLOAD" == "yes" ]]; then    
-        wget --spider $CHAIN_URL 2>&1 | grep -q 'Remote file exists.'
-        if [ "$?" -gt "0" ]; then
-            echo
-            echo -e "${R}Unable to download bootstrap file, the remote file does not exist.${N}"
-            echo
-            echo -e "${D}No worries, your masternode will be able to start without a bootstrap.${N}" 
-        else
-            CHAIN_SIZE=$(wget --spider $CHAIN_URL  2>&1 | grep Length | awk -F"[()]" '{print $2}')
-            echo
-            echo -e "${D}Do you want to download $CHAIN_SIZE bootstrap file? [Y/n]${N}"
-
-            read -s -n1 SELECTION
-
-            if [[ $SELECTION == @("Y"|"y"|"") ]]; then
+    if [ ! -z $CHAIN_URL ]; then
+        if [[ "$DOWNLOAD" == "yes" ]]; then    
+            wget --spider $CHAIN_URL 2>&1 | grep -q 'Remote file exists.'
+            if [ "$?" -gt "0" ]; then
                 echo
-                echo -e "${D}Downloading bootstrap file ($CHAIN_ZIP), this may take a few minutes...${N}"
-                wget -q $CHAIN_URL -P $COIN_FOLDER --show-progress
-                if [ "$?" -gt "0" ]; then
-                    echo
-                    echo -e "${R}Failed to download bootstrap file.${N}"
-                    echo
-                    echo -e "${D}No worries, your masternode will be able to start without a bootstrap.${N}" 
-                else
-                    echo
-                    echo -e "${D}Bootstrap has been downloaded successfully.${N}"
-                fi
-                SKIPPED="no"
+                echo -e "${R}Unable to download bootstrap file, the remote file does not exist.${N}"
+                echo
+                echo -e "${D}No worries, your masternode will be able to start without a bootstrap.${N}" 
             else
+                CHAIN_SIZE=$(wget --spider $CHAIN_URL  2>&1 | grep Length | awk -F"[()]" '{print $2}')
                 echo
-                echo -e "${Y}Bootstrap download skipped.${N}"
-                SKIPPED="yes"
-            fi
-        fi           
-    fi 
-    
-    if [ -f $COIN_FOLDER/$CHAIN_ZIP ]; then
-         if [ -z $CHAIN_SIZE ]; then
-            CHAIN_SIZE=$(ls -lh $COIN_FOLDER/$CHAIN_ZIP | awk -F " " {'print $5'})
-        fi    
-        if [ -f "$COIN_FOLDER/$COIN_PID" ]; then
-            ps -ef | grep $(/bin/cat $COIN_FOLDER/$COIN_PID) | grep $COIN_DAEMON | grep -v grep >/dev/null 2>&1
-            EXITCODE="$?"
-            if [[ "$EXITCODE" -eq "0" ]]; then
-                STARTED="yes"
-                echo
-                node_stop
-            else
-                STARTED="no"
-                echo
-                echo -e "${R}Masternode PID file exist, but no process found.${N}"
-            fi
-        else
-            STARTED="no"
-            if [ -d $COIN_FOLDER/database ]; then 
-                echo
-                echo -e "${R}Masternode is not running.${N}" 
-            fi
-        fi
-        
-        # Delete blockchain files and folders
-        for ITEM in ${CHAIN_DATA[@]}; do
-            if [ -d $COIN_FOLDER/$ITEM ] || [ -f $COIN_FOLDER/$ITEM ]; then
-                echo
-                echo -e "${D}Deleting $COIN_FOLDER/$ITEM...${N}"
-                /bin/rm -rf $COIN_FOLDER/$ITEM
-            fi
-        done
-        
-        echo
-        echo
-        echo
-        echo -e "${G}EXTRACTING ${NODE_NAME^^} MASTERNODE BOOTSTRAP${N}"
-        echo
-        echo -e "${D}Extracting bootstrap file, this may take a few minutes...${N}"
-        extract $COIN_FOLDER/$CHAIN_ZIP $COIN_FOLDER | awk 'BEGIN {ORS=" "} {if(NR%4==0)print "."}'
-        if [ "$?" -gt "0" ]; then
-            echo
-            echo -e "${R}Failed to extract $CHAIN_ZIP.${N}"
-            echo -e "${D}No worries, your masternode will be able to start without a bootstrap.${N}" 
-        else
-            echo
-            echo
-            echo -e "${Y}Finished extracting bootstrap.${N}"
-            echo
-            echo
-            echo -e "${D}Would you like to delete the $CHAIN_SIZE bootstrap file from disk? [y/N]${N}"
-            read -s -n1 SELECTION
-            if [[ ! $SELECTION == @("N"|"n"|"") ]]; then 
-                echo
-                echo -e "${D}Deleting bootstrap file...${N}"
-                rm -f $COIN_FOLDER/$CHAIN_ZIP
-            fi
-            echo
-            echo -e "${Y}Finished installing bootstrap.${N}"
-        fi
+                echo -e "${D}Do you want to download $CHAIN_SIZE bootstrap file? [Y/n]${N}"
 
-        if [[ "$STARTED" == "yes" ]]; then
-            node_start
-        else
-            if [[ "$ARG1" != "install" ]]; then
-                echo
-                echo
-                echo -e "${D}Masternode was not running. Would you like it to be started? [Y/n]${N}"
                 read -s -n1 SELECTION
 
-                if [[ $SELECTION == @("Y"|"y"|"") ]]; then 
-                    node_start
+                if [[ $SELECTION == @("Y"|"y"|"") ]]; then
+                    echo
+                    echo -e "${D}Downloading bootstrap file ($CHAIN_ZIP), this may take a few minutes...${N}"
+                    wget -q $CHAIN_URL -P $COIN_FOLDER --show-progress
+                    if [ "$?" -gt "0" ]; then
+                        echo
+                        echo -e "${R}Failed to download bootstrap file.${N}"
+                        echo
+                        echo -e "${D}No worries, your masternode will be able to start without a bootstrap.${N}" 
+                    else
+                        echo
+                        echo -e "${D}Bootstrap has been downloaded successfully.${N}"
+                    fi
+                    SKIPPED="no"
+                else
+                    echo
+                    echo -e "${Y}Bootstrap download skipped.${N}"
+                    SKIPPED="yes"
+                fi
+            fi           
+        fi 
+        
+        if [ -f $COIN_FOLDER/$CHAIN_ZIP ]; then
+             if [ -z $CHAIN_SIZE ]; then
+                CHAIN_SIZE=$(ls -lh $COIN_FOLDER/$CHAIN_ZIP | awk -F " " {'print $5'})
+            fi    
+            if [ -f "$COIN_FOLDER/$COIN_PID" ]; then
+                ps -ef | grep $(/bin/cat $COIN_FOLDER/$COIN_PID) | grep $COIN_DAEMON | grep -v grep >/dev/null 2>&1
+                EXITCODE="$?"
+                if [[ "$EXITCODE" -eq "0" ]]; then
+                    STARTED="yes"
+                    echo
+                    node_stop
+                else
+                    STARTED="no"
+                    echo
+                    echo -e "${R}Masternode PID file exist, but no process found.${N}"
+                fi
+            else
+                STARTED="no"
+                if [ -d $COIN_FOLDER/database ]; then 
+                    echo
+                    echo -e "${R}Masternode is not running.${N}" 
                 fi
             fi
-        fi        
-    else
-        if [[ $SKIPPED == "no" ]]; then
-            echo -e "${R}Bootstrap file not found.${N}"  
-        fi
-    fi
+            
+            # Delete blockchain files and folders
+            for ITEM in ${CHAIN_DATA[@]}; do
+                if [ -d $COIN_FOLDER/$ITEM ] || [ -f $COIN_FOLDER/$ITEM ]; then
+                    echo
+                    echo -e "${D}Deleting $COIN_FOLDER/$ITEM...${N}"
+                    /bin/rm -rf $COIN_FOLDER/$ITEM
+                fi
+            done
+            
+            echo
+            echo
+            echo
+            echo -e "${G}EXTRACTING ${NODE_NAME^^} MASTERNODE BOOTSTRAP${N}"
+            echo
+            echo -e "${D}Extracting bootstrap file, this may take a few minutes...${N}"
+            extract $COIN_FOLDER/$CHAIN_ZIP $COIN_FOLDER | awk 'BEGIN {ORS=" "} {if(NR%4==0)print "."}'
+            if [ "$?" -gt "0" ]; then
+                echo
+                echo -e "${R}Failed to extract $CHAIN_ZIP.${N}"
+                echo -e "${D}No worries, your masternode will be able to start without a bootstrap.${N}" 
+            else
+                echo
+                echo
+                echo -e "${Y}Finished extracting bootstrap.${N}"
+                echo
+                echo
+                echo -e "${D}Would you like to delete the $CHAIN_SIZE bootstrap file from disk? [y/N]${N}"
+                read -s -n1 SELECTION
+                if [[ ! $SELECTION == @("N"|"n"|"") ]]; then 
+                    echo
+                    echo -e "${D}Deleting bootstrap file...${N}"
+                    rm -f $COIN_FOLDER/$CHAIN_ZIP
+                fi
+                echo
+                echo -e "${Y}Finished installing bootstrap.${N}"
+            fi
 
+            if [[ "$STARTED" == "yes" ]]; then
+                node_start
+            else
+                if [[ "$ARG1" != "install" ]]; then
+                    echo
+                    echo
+                    echo -e "${D}Masternode was not running. Would you like it to be started? [Y/n]${N}"
+                    read -s -n1 SELECTION
+
+                    if [[ $SELECTION == @("Y"|"y"|"") ]]; then 
+                        node_start
+                    fi
+                fi
+            fi        
+        else
+            if [[ $SKIPPED == "no" ]]; then
+                echo -e "${R}Bootstrap file not found.${N}"  
+            fi
+        fi
+    else
+        echo -e "${R}Sorry, a bootstrap URL was not provided by this script.${N}"
+    fi
 }
 
 
@@ -1295,7 +1343,6 @@ function update_config() {
         echo 'masternodeaddr=['$EXT_IP']:'$COIN_PORT
         echo ''        
         echo 'masternodeprivkey='$COINKEY
-        echo '#masternodeblsprivkey='
         echo ''        
     } >> $COIN_FOLDER/$COIN_CONFIG
     sleep 0.5
@@ -1312,24 +1359,51 @@ function download_addnodes() {
     echo -e "${G}ADD ADDNODE LIST${N}"
     echo
     echo -e "${D}Adding addnode list to masternode configuration file ${P}$COIN_CONFIG${N}...${N}"
-    # Verify addnodes list online availability
-    wget --spider $NODES_URL >/dev/null 2>&1
-    sleep 0.5
-    if [ "$?" -gt "0" ]; then
-        echo
-        echo -e "${R}Failed to download addnode list $NODES_URL.${N}"
-        echo -e "${D}No worries, your masternode will be able to start without the addnodes.${N}" 
-    else
-        # Downloading and adding addnode list to config file
-        wget -O- -q $NODES_URL >> $COIN_FOLDER/$COIN_CONFIG
-        if [ "$?" -gt "0" ]; then
-            echo
-            echo -e "${R}Failed to download addnode list $NODES_URL.${N}"
-            echo -e "${D}Your masternode will be able to start without the addnodes.${N}" 
+    if [ -f $COIN_FOLDER/$COIN_CONFIG ]; then
+        if [ ! -z $NODES_URL ]; then
+            # Store downloaded and sort addnode list to variable
+            ADDNODELIST=$(wget -qO- $NODES_URL | sort -uV )
+
+            if [ "$?" -gt "0" ]; then
+                echo
+                echo -e "${R}The addnode list file is currently not available for download at $NODES_URL.${N}"
+                echo -e "${D}No worries, your masternode will be able to start without the addnodes.${N}"
+            else
+                # Check if addnodes are already added to Masternode config file
+                ADDNODESADDED=$(/bin/cat $COIN_FOLDER/$COIN_CONFIG | grep "addnode") #> /dev/null 2>&1
+
+                if [[ ! -z $ADDNODESADDED ]]; then
+                echo
+                    echo -e "${D}Addnodes are already listed in ${P}$COIN_CONFIG${N}. Would you like to replace (Y) or add (N) the addnodes? [Y/n].${N}"
+                    read -s -n1 SELECTION                
+                    if [[ $SELECTION == @("Y"|"y"|"") ]]; then
+                        # Delete old addnodes
+                        sed -i '/addnode/d' $COIN_FOLDER/$COIN_CONFIG
+                    else
+                        # Concatenate addnode lists
+                        ADDNODESTOTAL="$ADDNODESADDED"
+                        ADDNODESTOTAL+=$'\n'
+                        ADDNODESTOTAL+="$ADDNODELIST"
+                        
+                        # Sort and remove duplicates
+                        ADDNODELIST=$(echo "$ADDNODESTOTAL" | sort -uV )
+                    fi
+                fi
+
+                # Delete all empty lines at the end of the masternode config file
+                sed -i -e :a -e '/^\n*$/{$d;N;};/\n$/ba' $COIN_FOLDER/$COIN_CONFIG
+
+                # Add contents of addnodelist variable to the masternode config file  
+                echo "" >> $COIN_FOLDER/$COIN_CONFIG
+                echo "$ADDNODELIST" >> $COIN_FOLDER/$COIN_CONFIG
+                echo
+                echo -e "${Y}Successfully added addnode list to masternode configuration file.${N}"
+            fi
         else
-            echo
-            echo -e "${Y}Successfully added addnode list to masternode configuration file.${N}"
-        fi        
+            echo -e "${R}Sorry, an addnode list URL was not provided by this script.${N}"
+        fi
+    else
+        echo -e "${R}Masternode configuration $COIN_FOLDER/$COIN_CONFIG file not found.${N}"
     fi
 }
 
@@ -1507,7 +1581,7 @@ function node_status() {
     fi
     echo
     echo -e "${C}systemctl status $COIN_SERVICE ${N}"
-    /bin/systemctl status $COIN_SERVICE 
+    /bin/systemctl status $COIN_SERVICE --no-pager
     echo
     echo -e "${C}$COIN_CLI $MNCLI_STATUS${N}"
     $COIN_CLI $MNCLI_STATUS
@@ -1817,7 +1891,7 @@ function install_additional_node () {
             read -s -n1 SELECTION
             
             case $SELECTION in
-                M|m|*)
+                M|m)
                     echo
                     echo -e "${D}Temporarily moving bootstrap file...${N}"
                     mv $COIN_FOLDER/$CHAIN_ZIP $COIN_FOLDER/../$CHAIN_ZIP 
@@ -1876,6 +1950,7 @@ function installation_summary() {
     echo
     echo -e "${G}MAIN MASTERNODE INSTALLATION SUMMARY${N}"
     echo
+
     if [ -f $COIN_FOLDER/$COIN_CONFIG ]; then
         CONFCONTENTS=$(cat $COIN_FOLDER/$COIN_CONFIG)
         COIN_PORT=$(echo "$CONFCONTENTS" | grep ^port | sed -e 's#.*=\(\)#\1#')
@@ -1883,8 +1958,8 @@ function installation_summary() {
         EXT_IP=$(echo "$CONFCONTENTS" | grep externalip | sed -e 's#.*=\(\)#\1#')
         MN_ADDR=$(echo "$CONFCONTENTS" | grep masternodeaddr | sed -e 's#.*=\(\)#\1#')
         COINKEY=$(echo "$CONFCONTENTS" | grep masternodeprivkey | sed -e 's#.*=\(\)#\1#')
-        
-        STATUS=$($COIN_CLI $MNCLI_STATUS 2>&1 | grep -v { | grep -v })
+
+        STATUS=$($COIN_CLI $MNCLI_STATUS 2>&1 | grep -vx } | grep -vx {)
         echo -e "${D}$NODE_NAME masternode status:${N}"
         echo "$STATUS"
         echo
@@ -1928,9 +2003,8 @@ function installation_summary() {
     if [ ! -z "$WWW_GHUB"  ]; then echo -e "${D}- Github website            : ${Y}$WWW_GHUB${N}" ; fi
     if [ ! -z "$WWW_MNO"   ]; then echo -e "${D}- Masternode Online website : ${Y}$WWW_MNO${N}"  ; fi
     if [ ! -z "$WWW_CMC"   ]; then echo -e "${D}- CoinMarkedCap website     : ${Y}$WWW_CMC${N}"  ; fi   
-    if [ ! -f $DUPMN_CONFIG  ]; then
+    if [[ $DUPMN_ENABLE == "true" ]]; then
         if [ ! -z "$WWW_DUPMN"   ]; then echo -e "${D}- Dupmn website             : ${Y}$WWW_DUPMN${N}"  ; fi
-    else        
         dupmn_summary
     fi
     echo
@@ -2055,6 +2129,7 @@ function donation() {
 }   
 
 
+
 #########################################################################################################
 #                                    CALL FUNCTIONS                                                     #
 #########################################################################################################
@@ -2106,22 +2181,34 @@ if [[ $ARG1 == "install" ]]; then
         install_bootstrap
         node_start
         node_status
+        sleep 3
         clear_screen
         display_logo
         installation_summary
     else
         clear_screen
         display_logo
-        install_additional_node
+        if [[ $DUPMN_ENABLE == "true" ]]; then
+            install_additional_node
+        else
+            installation_summary
+            echo
+            echo -e "${R}A $NODE_NAME masternode has already been installed.${N}"
+        fi
     fi
 fi
 
 
 if [[ $ARG1 == "dupmn" ]]; then
     VALIDCMD="true"
-    install_dupmn
-    create_dupmn_config
-    load_dupmn_profile
+    if [[ $DUPMN_ENABLE == "false" ]]; then
+        echo
+        echo -e "${Y}Sorry, dupmn has not been enabled for $NODE_NAME masternodes.${N}"
+    else
+        install_dupmn
+        create_dupmn_config
+        load_dupmn_profile
+    fi
 fi
 
 
@@ -2150,10 +2237,12 @@ if [[ $ARG1 == "createbootstrap"  ]]; then VALIDCMD="true"; create_bootstrap    
 if [[ $ARG1 == "monitor"          ]]; then VALIDCMD="true"; monitor_large               ; fi
 if [[ $ARG1 == "replace"          ]]; then VALIDCMD="true"; replace                     ; fi
 if [[ $ARG1 == "update"           ]]; then VALIDCMD="true"; update_binaries             ; fi
+if [[ $ARG1 == "addnodes"         ]]; then VALIDCMD="true"; download_addnodes           ; fi
 if [[ $ARG1 == "createswap"       ]]; then VALIDCMD="true"; create_swapfile             ; fi
+if [[ $ARG1 == "optimize"         ]]; then VALIDCMD="true"; ssd_optimizations           ; fi
 
 
-# Development options
+# Development options (not listed when displaying help)
 if [[ $ARG1 == "check"            ]]; then VALIDCMD="true"; checks                      ; fi
 if [[ $ARG1 == "genkey"           ]]; then VALIDCMD="true"; create_privkey              ; fi
 if [[ $ARG1 == "extract"          ]]; then VALIDCMD="true"; extract $ARG2 $ARG3         ; fi                                                                              
