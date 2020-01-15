@@ -38,7 +38,7 @@
 
 
 # Script version (script/coin)
-VERSION=0.4
+VERSION=0.5
 
 
 # Donation addresses
@@ -83,19 +83,20 @@ MNCLI_SYNC="mnsync status"                                                      
 
 
 # Masternode binaries URL
-COIN_URL16="https://github.com/dehaebbede/mclb/raw/master/mclb-ubuntu16.zip"                        # Binaries compressed file for Ubuntu 16.
-COIN_URL18="https://github.com/dehaebbede/mclb/raw/master/mclb-ubuntu18.zip"                        # Binaries compressed file for Ubuntu 18.
+COIN_URL16="https://github.com/millenniumclub/MCLB/releases/download/v1.0.0.0/millenniumclubcoin-1.0.0.0-ubuntu-16.04.tgz"  # Binaries compressed file for Ubuntu 16.
+COIN_URL18="https://github.com/millenniumclub/MCLB/releases/download/v1.0.0.0/millenniumclubcoin-1.0.0.0-ubuntu-18.04.tgz"  # Binaries compressed file for Ubuntu 18.
 COIN_ZIPDIR="/"                                                                                     # Path inside the zipfile that contains the binaries.
 
 
 # Masternode Bootstrap URL
-#CHAIN_URL="https://github.com/dehaebbede/mclb/raw/master/mclb-bootstrap.zip"                       # Bootstrap compressed file containing chain directory's.
+#CHAIN_URL="https://github.com/millenniumclub/MCLB/releases/download/v1.0.0.0/mclb-bootstrap.zip"   # Bootstrap URL. The Bootstrap is compressed file containing chain directory's.
+CHAIN_ZIP=$(echo $CHAIN_URL | awk -F'/' '{print $NF}')                                              # Get bootstrap file name from URL. Will be lowercase <COIN_TICKER>_bootstrap.zip when not provided.
 CHAIN_DATA="blocks chainstate peers.dat"                                                            # Folders and files used for creating bootstrap.zip (separate by spaces, usually blocks chainstate peers.dat). 
                                                                                                     # These folders and files will also be deleted when installing bootstrap.  
 
 # Masternode Addnodes URL
-#NODES_URL="https://github.com/dehaebbede/mclb/raw/master/addnodes.txt"                             # Addnodes.txt file.
-
+NODES_URL="https://github.com/millenniumclub/MCLB/releases/download/v1.0.0.0/addnodes.txt"          # Addnodes URL.
+NODES_TXT=$(echo $NODES_URL | awk -F'/' '{print $NF}')                                              # Get addnodes.txt file name from URL.
 
 # Masternode related website URLs (shown at installation summary)
 WWW_MAIN="https://www.millenniumclub.ca/"                                                           # Main website URL.
@@ -111,20 +112,14 @@ DUPMN_NAME="dupmn"
 DUPMN_EXEC="/usr/bin/dupmn"
 DUPMN_CONFIG="/root/.dupmn/dupmn.conf"
 DUPMN_MNCONF="/root/.dupmn/${COIN_NAME}.dmn"
-DUPMN_URL="https://raw.githubusercontent.com/neo3587/dupmn/master/dupmn_install.sh"
-
+DUPMN_URL="https://raw.githubusercontent.com/neo3587/dupmn/master/dupmn_install.sh"                 # Dupmn URL.
+DUPMN_SH=$(echo $DUPMN_URL | awk -F'/' '{print $NF}')                                               # Get dupmn install file name from URL.
 
 # Dupmn related website URLs (shown at installation summary)
 WWW_DUPMN="https://github.com/neo3587/dupmn"
 WWW_DUPMN1="https://github.com/neo3587/dupmn/wiki"
 WWW_DUPMN2="https://github.com/neo3587/dupmn/wiki/FAQs"
 WWW_DUPMN3="https://github.com/neo3587/dupmn/wiki/Commands"
-
-
-# Get file names from URLs
-CHAIN_ZIP=$(echo $CHAIN_URL | awk -F'/' '{print $NF}')
-NODES_TXT=$(echo $NODES_URL | awk -F'/' '{print $NF}')
-DUPMN_SH=$(echo $DUPMN_URL | awk -F'/' '{print $NF}')
 
 
 
@@ -267,26 +262,26 @@ function display_help() {
     echo
 	echo -e "${D}Usage: $SCRIPT_NAME ${C}<option> [parameters]${N}"
 	echo
-    echo -e "${D}$SCRIPT_NAME ${C}install           ${D}: Install $NODE_NAME masternode(s)${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}summary           ${D}: Display $NODE_NAME main masternode installation summary${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}help              ${D}: Display this help text${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}update            ${D}: Update $NODE_NAME binaries${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}addnodes          ${D}: Add/replace addnode list in $COIN_CONFIG${N}"  
-    echo -e "${D}$SCRIPT_NAME ${C}bootstrap         ${D}: Download and install $NODE_NAME bootstrap${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}createbootstrap   ${D}: Create $NODE_NAME bootstrap (from installed masternode)${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}stop              ${D}: Stop $NODE_NAME masternode${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}start             ${D}: Start $NODE_NAME masternode${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}status            ${D}: Show $NODE_NAME masternode status${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}monitor [seconds] ${D}: Monitor $NODE_NAME masternode and system continuously${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}showconf          ${D}: Display contents of $COIN_CONFIG${N}" 
-    echo -e "${D}$SCRIPT_NAME ${C}replace strA strB ${D}: Replace 'string A' with 'string B' in $COIN_CONFIG${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}createswap        ${D}: Create swap file (not recommended for SSD)${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}optimize          ${D}: Enable SSD optimizations${N}"
+    echo -e "${C}install                ${D}: Install $NODE_NAME masternode(s)${N}"
+    echo -e "${C}summary                ${D}: Display $NODE_NAME main masternode installation summary${N}"
+    echo -e "${C}help                   ${D}: Display this help text${N}"
+    echo -e "${C}update                 ${D}: Update $NODE_NAME binaries${N}"
+    echo -e "${C}addnodes               ${D}: Add/replace addnode list in $COIN_CONFIG${N}"  
+    echo -e "${C}bootstrap              ${D}: Download and install $NODE_NAME bootstrap${N}"
+    echo -e "${C}createbootstrap        ${D}: Create $NODE_NAME bootstrap (from installed masternode)${N}"
+    echo -e "${C}stop                   ${D}: Stop $NODE_NAME masternode${N}"
+    echo -e "${C}start                  ${D}: Start $NODE_NAME masternode${N}"
+    echo -e "${C}status                 ${D}: Show $NODE_NAME masternode status${N}"
+    echo -e "${C}monitor [seconds]      ${D}: Monitor $NODE_NAME masternode and system continuously${N}"
+    echo -e "${C}showconf               ${D}: Display contents of $COIN_CONFIG${N}" 
+    echo -e "${C}replace [strA] [strB]  ${D}: Replace 'string A' with 'string B' in $COIN_CONFIG${N}"
+    echo -e "${C}createswap             ${D}: Create swap file (not recommended for SSD)${N}"
+    echo -e "${C}optimize               ${D}: Enable SSD optimizations${N}"
     if [[ $DUPMN_ENABLE == "true" ]]; then
-        echo -e "${D}$SCRIPT_NAME ${C}dupmn             ${D}: Install or update dupmn${N}"
+        echo -e "${C}dupmn                  ${D}: Install or update dupmn${N}"
     fi
-    echo -e "${D}$SCRIPT_NAME ${C}disclaimer        ${D}: Display disclaimer${N}"
-    echo -e "${D}$SCRIPT_NAME ${C}donation          ${D}: Show donation addresses${N}"
+    echo -e "${C}disclaimer             ${D}: Display disclaimer${N}"
+    echo -e "${C}donation               ${D}: Show donation addresses${N}"
     echo
 }
 
@@ -995,8 +990,8 @@ function create_bootstrap() {
     # Change to coin folder
     cd $COIN_FOLDER  > /dev/null 2>&1 
     
-    if [ -z $COIN_FOLDER/$CHAIN_ZIP ]; then
-        CHAIN_ZIP="${COIN_NAME}_bootstrap.zip"
+    if [ -z $CHAIN_ZIP ]; then
+        CHAIN_ZIP="${COIN_TICKER,,}_bootstrap.zip"
     fi
     
     if [ -f $COIN_FOLDER/$CHAIN_ZIP ]; then
@@ -1146,8 +1141,8 @@ function get_externalip() {
     echo -e "${D}The masternode external IP address will be defined as 'externalip' and 'masternodeaddr' in the masternode config file.${N}"
     echo
     
-    EXT_IP4=($(/usr/bin/curl -s4 ident.me))
-    EXT_IP6=($(/usr/bin/curl -s6 ident.me))
+    EXT_IP4=($(/usr/bin/curl -s4 v4.ident.me))
+    EXT_IP6=($(/usr/bin/curl -s6 v6.ident.me))
 
     if ([ $EXT_IP4 != $NODE_IP ] && [ $EXT_IP6 != $NODE_IP ])
     then
@@ -1362,7 +1357,7 @@ function download_addnodes() {
     if [ -f $COIN_FOLDER/$COIN_CONFIG ]; then
         if [ ! -z $NODES_URL ]; then
             # Store downloaded and sort addnode list to variable
-            ADDNODELIST=$(wget -qO- $NODES_URL | sort -uV )
+            ADDNODELIST=$(wget -qO- $NODES_URL | sed 's/^M$//' | sort -uV )
 
             if [ "$?" -gt "0" ]; then
                 echo
@@ -1377,27 +1372,30 @@ function download_addnodes() {
                     echo -e "${D}Addnodes are already listed in ${P}$COIN_CONFIG${N}. Would you like to replace (Y) or add (N) the addnodes? [Y/n].${N}"
                     read -s -n1 SELECTION                
                     if [[ $SELECTION == @("Y"|"y"|"") ]]; then
-                        # Delete old addnodes
-                        sed -i '/addnode/d' $COIN_FOLDER/$COIN_CONFIG
+                        ADDNODESTOTAL+="$ADDNODELIST"
                     else
                         # Concatenate addnode lists
                         ADDNODESTOTAL="$ADDNODESADDED"
                         ADDNODESTOTAL+=$'\n'
                         ADDNODESTOTAL+="$ADDNODELIST"
-                        
-                        # Sort and remove duplicates
-                        ADDNODELIST=$(echo "$ADDNODESTOTAL" | sort -uV )
                     fi
+                    # Sort and remove duplicates
+                    ADDNODELIST=$(echo "$ADDNODESTOTAL" | sort -uV )
                 fi
 
+                NROFADDNODES=$(echo "$ADDNODELIST" | wc -l)
+                
+                # Delete old addnodes
+                sed -i '/addnode/d' $COIN_FOLDER/$COIN_CONFIG
+                
                 # Delete all empty lines at the end of the masternode config file
                 sed -i -e :a -e '/^\n*$/{$d;N;};/\n$/ba' $COIN_FOLDER/$COIN_CONFIG
-
-                # Add contents of addnodelist variable to the masternode config file  
+   
+                # Add new addnode list to the masternode config file  
                 echo "" >> $COIN_FOLDER/$COIN_CONFIG
                 echo "$ADDNODELIST" >> $COIN_FOLDER/$COIN_CONFIG
                 echo
-                echo -e "${Y}Successfully added addnode list to masternode configuration file.${N}"
+                echo -e "${Y}Successfully (re)added $NROFADDNODES unique addnodes to the masternode configuration file.${N}"
             fi
         else
             echo -e "${R}Sorry, an addnode list URL was not provided by this script.${N}"
@@ -2245,17 +2243,18 @@ if [[ $ARG1 == "optimize"         ]]; then VALIDCMD="true"; ssd_optimizations   
 # Development options (not listed when displaying help)
 if [[ $ARG1 == "check"            ]]; then VALIDCMD="true"; checks                      ; fi
 if [[ $ARG1 == "genkey"           ]]; then VALIDCMD="true"; create_privkey              ; fi
-if [[ $ARG1 == "extract"          ]]; then VALIDCMD="true"; extract $ARG2 $ARG3         ; fi                                                                              
+if [[ $ARG1 == "extract"          ]]; then VALIDCMD="true"; extract $ARG2 $ARG3         ; fi # Args: 'Compressed file name' 'Extraction directory'
 if [[ $ARG1 == "version"          ]]; then VALIDCMD="true"; script_version              ; fi  
 if [[ $ARG1 == "clear"            ]]; then VALIDCMD="true"; clear_screen                ; fi 
 if [[ $ARG1 == "system"           ]]; then VALIDCMD="true"; update_system               ; fi
 if [[ $ARG1 == "dependencies"     ]]; then VALIDCMD="true"; install_dependencies        ; fi
-if [[ $ARG1 == "firewall"         ]]; then VALIDCMD="true"; enable_firewall $ARG2 $ARG3 ; fi
+if [[ $ARG1 == "firewall"         ]]; then VALIDCMD="true"; enable_firewall $ARG2 $ARG3 ; fi # Args: 'Coin Port' 'Node Name'
 if [[ $ARG1 == "fail2ban"         ]]; then VALIDCMD="true"; install_fail2ban            ; fi
 if [[ $ARG1 == "swapfile"         ]]; then VALIDCMD="true"; create_swapfile             ; fi
 if [[ $ARG1 == "ssd"              ]]; then VALIDCMD="true"; ssd_optimizations           ; fi
 if [[ $ARG1 == "monitor_small"    ]]; then VALIDCMD="true"; monitor_small               ; fi
 if [[ $ARG1 == "alias"            ]]; then VALIDCMD="true"; add_alias                   ; fi
+
 
 # Change to originating folder
 cd $CURRENT_DIR >/dev/null 2>&1
