@@ -24,23 +24,24 @@ and management of your Millennium Club masternode.
 
 Usage: millenniumclub_masternode_manager.sh <option> [parameters]
 
-millenniumclub_masternode_manager.sh install           : Install Millennium Club masternode(s)
-millenniumclub_masternode_manager.sh summary           : Display Millennium Club main masternode installation summary
-millenniumclub_masternode_manager.sh help              : Display this help text
-millenniumclub_masternode_manager.sh update            : Update Millennium Club binaries
-millenniumclub_masternode_manager.sh addnodes          : Add/replace addnode list in millenniumclubcoin.conf
-millenniumclub_masternode_manager.sh bootstrap         : Download and install Millennium Club bootstrap
-millenniumclub_masternode_manager.sh createbootstrap   : Create Millennium Club bootstrap (from installed masternode)
-millenniumclub_masternode_manager.sh stop              : Stop Millennium Club masternode
-millenniumclub_masternode_manager.sh start             : Start Millennium Club masternode
-millenniumclub_masternode_manager.sh status            : Show Millennium Club masternode status
-millenniumclub_masternode_manager.sh monitor [seconds] : Monitor Millennium Club masternode and system continuously
-millenniumclub_masternode_manager.sh showconf          : Display contents of millenniumclubcoin.conf
-millenniumclub_masternode_manager.sh replace strA strB : Replace 'string A' with 'string B' in millenniumclubcoin.conf
-millenniumclub_masternode_manager.sh createswap        : Create swap file (not recommended for SSD)
-millenniumclub_masternode_manager.sh optimize          : Enable SSD optimizations
-millenniumclub_masternode_manager.sh disclaimer        : Display disclaimer
-millenniumclub_masternode_manager.sh donation          : Show donation addresses
+install                : Install Millennium Club masternode(s)
+summary                : Display Millennium Club main masternode installation summary
+help                   : Display this help text
+update                 : Update Millennium Club binaries
+addnodes               : Add/replace addnode list in millenniumclubcoin.conf
+bootstrap              : Download and install Millennium Club bootstrap
+createbootstrap        : Create Millennium Club bootstrap (from installed masternode)
+stop                   : Stop Millennium Club masternode
+start                  : Start Millennium Club masternode
+status                 : Show Millennium Club masternode status
+monitor [seconds]      : Monitor Millennium Club masternode and system continuously
+bashcompletion         : Add bash-completion commands
+showconf               : Display contents of millenniumclubcoin.conf
+replace [strA] [strB]  : Replace 'string A' with 'string B' in millenniumclubcoin.conf
+createswap             : Create swap file (not recommended for SSD)
+optimize               : Enable SSD optimizations
+disclaimer             : Display disclaimer
+donation               : Show donation addresses
 
 
 

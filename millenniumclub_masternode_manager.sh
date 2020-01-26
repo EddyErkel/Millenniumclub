@@ -4,7 +4,7 @@
 #########################################################################################################
 # Creator: Eddy Erkel                                                                                   #
 # Discord: Eddy#6547                                                                                    #
-# Date   : Januari, 2020                                                                                #
+# Date   : January, 2020                                                                                #
 # Github : https://github.com/EddyErkel/                                                                #
 #                                                                                                       #
 # Disclamer:                                                                                            #
@@ -37,8 +37,8 @@
 #########################################################################################################
 
 
-# Script version (script/coin)
-VERSION=0.5
+# Script version
+VERSION=0.6
 
 
 # Donation addresses
@@ -83,8 +83,8 @@ MNCLI_SYNC="mnsync status"                                                      
 
 
 # Masternode binaries URL
-COIN_URL16="https://github.com/millenniumclub/MCLB/releases/download/v1.0.0.0/millenniumclubcoin-1.0.0.0-ubuntu-16.04.tgz"  # Binaries compressed file for Ubuntu 16.
-COIN_URL18="https://github.com/millenniumclub/MCLB/releases/download/v1.0.0.0/millenniumclubcoin-1.0.0.0-ubuntu-18.04.tgz"  # Binaries compressed file for Ubuntu 18.
+COIN_URL16="https://github.com/millenniumclub/MCLB/releases/download/v1.0.0.0/millenniumclubcoin-1.0.0.0-x86_64-linux.tgz"  # Binaries compressed file for Ubuntu 16.
+COIN_URL18="https://github.com/millenniumclub/MCLB/releases/download/v1.0.0.0/millenniumclubcoin-1.0.0.0-x86_64-linux.tgz"  # Binaries compressed file for Ubuntu 18.
 COIN_ZIPDIR="/"                                                                                     # Path inside the zipfile that contains the binaries.
 
 
@@ -97,6 +97,7 @@ CHAIN_DATA="blocks chainstate peers.dat"                                        
 # Masternode Addnodes URL
 NODES_URL="https://github.com/millenniumclub/MCLB/releases/download/v1.0.0.0/addnodes.txt"          # Addnodes URL.
 NODES_TXT=$(echo $NODES_URL | awk -F'/' '{print $NF}')                                              # Get addnodes.txt file name from URL.
+
 
 # Masternode related website URLs (shown at installation summary)
 WWW_MAIN="https://www.millenniumclub.ca/"                                                           # Main website URL.
@@ -115,11 +116,18 @@ DUPMN_MNCONF="/root/.dupmn/${COIN_NAME}.dmn"
 DUPMN_URL="https://raw.githubusercontent.com/neo3587/dupmn/master/dupmn_install.sh"                 # Dupmn URL.
 DUPMN_SH=$(echo $DUPMN_URL | awk -F'/' '{print $NF}')                                               # Get dupmn install file name from URL.
 
+
 # Dupmn related website URLs (shown at installation summary)
 WWW_DUPMN="https://github.com/neo3587/dupmn"
 WWW_DUPMN1="https://github.com/neo3587/dupmn/wiki"
 WWW_DUPMN2="https://github.com/neo3587/dupmn/wiki/FAQs"
 WWW_DUPMN3="https://github.com/neo3587/dupmn/wiki/Commands"
+
+
+# Bash-completion commands
+MNMGTCOMMANDS="help autocompletion install summary update addnodes bootstrap createbootstrap stop start status monitor showconf replace createswap optimize disclaimer donation"
+MNCLICOMMANDS="help getblockchaininfo getblockcount getinfo createmasternodekey getmasternodecount getmasternodestatus getnetworkinfo getconnectioncount getpeerinfo 'masternode status' 'mnsync status'"
+DUPMNCOMMANDS="help profadd profdel install uninstall bootstrap iplist systemctlall list checkmem swapfile update"
 
 
 
@@ -226,6 +234,7 @@ D='\033[0;37m'    # Grey (Default)
 N='\033[0m'       # No Color
 
 
+
 #########################################################################################################
 #                                    GENERIC FUNCTIONS                                                  #
 #########################################################################################################
@@ -273,6 +282,7 @@ function display_help() {
     echo -e "${C}start                  ${D}: Start $NODE_NAME masternode${N}"
     echo -e "${C}status                 ${D}: Show $NODE_NAME masternode status${N}"
     echo -e "${C}monitor [seconds]      ${D}: Monitor $NODE_NAME masternode and system continuously${N}"
+    echo -e "${C}bashcompletion         ${D}: Add bash-completion commands${N}"
     echo -e "${C}showconf               ${D}: Display contents of $COIN_CONFIG${N}" 
     echo -e "${C}replace [strA] [strB]  ${D}: Replace 'string A' with 'string B' in $COIN_CONFIG${N}"
     echo -e "${C}createswap             ${D}: Create swap file (not recommended for SSD)${N}"
@@ -464,7 +474,10 @@ function install_binaries() {
                 echo
                 echo -e "${R}Failed to extract $COIN_ZIP.${N}"
                 exit 1
-            else 
+            else
+                rm -f $SCRIPT_DIR/$COIN_ZIP
+                echo
+                echo -e "${D}Deleting ${COIN_ZIP}...${N}"
                 echo
                 echo -e "${D}Setting execution permissions...${N}"
                 chmod +x $COIN_PATH/$COIN_DAEMON
@@ -1798,6 +1811,7 @@ function install_dupmn () {
                     echo -e "${Y}Finished installing dupmn.${N}"
                 fi
             fi
+
         else
             echo 
             echo -e "${Y}Installation of dupmn aborted.${N}"           
@@ -2032,6 +2046,97 @@ function dupmn_summary() {
 }
 
 
+# Install bash-completion for dupmn commands
+# https://github.com/scop/bash-completion
+function dupmn-bash-completion () {
+    echo
+    echo
+    echo  
+    echo -e "${G}INSTALL AND CONFIGURE BASH-COMPLETION FOR DUPMN COMMANDS${N}"
+    echo
+    echo -e "${D}Do you want to install and configure bash-completion for dupmn commands? [Y/n]${N}"
+    read -s -n1 SELECTION
+
+    if [[ $SELECTION == @("Y"|"y"|"") ]]; then
+
+        dpkg -s bash-completion >/dev/null 2>&1
+        if [ "$?" -gt "0" ]; then
+            echo
+            echo -e "${D}Bash-completion has not yet been installed on your system. Installing...${N}"
+            apt-get -y install bash-completion
+        fi
+
+        echo 'complete -W "'$DUPMNCOMMANDS'"' $DUPMN_NAME > /etc/bash_completion.d/${DUPMN_NAME}
+        
+        echo
+        echo -e "${D}Bash-completion configuration file for dupmn: ${P}/etc/bash_completion.d/${DUPMN_NAME}${D}.${N}"
+        
+        echo
+        echo -e "${Y}Finished Bash-completion for dupmn commands installation and configuration.${N}"  
+        echo
+        echo -e "${D}To use bash-completion type ${C}${DUPMN_NAME}${N} (followed by a space) and press the ${C}tab-key${N} multiple times.${N}"
+        echo -e "${D}This will show a selection of available commands (use help to show all commands).${N}"        
+        echo -e "${D}Type the first letter(s) of a command and press tab-key again to autocomplete the command.${N}"
+        echo
+        echo -e "${Y}Bash-completion for dupmn commands will be available next time you logon.${N}"
+    else
+        echo
+        echo -e "${Y}Installation of bash-completion for dupmn commands skipped.${N}"
+    fi
+}
+
+
+# Install bash-completion commands
+# https://github.com/scop/bash-completion
+function bash-completion () {
+    echo
+    echo
+    echo  
+    echo -e "${G}INSTALL AND CONFIGURE BASH-COMPLETION COMMANDS${N}"
+    echo
+    echo -e "${D}Do you want to install and configure bash-completion commands? [Y/n]${N}"
+    read -s -n1 SELECTION
+
+    if [[ $SELECTION == @("Y"|"y"|"") ]]; then
+
+        dpkg -s bash-completion >/dev/null 2>&1
+        if [ "$?" -gt "0" ]; then
+            echo
+            echo -e "${D}Bash-completion has not yet been installed on your system. Installing...${N}"
+            apt-get -y install bash-completion
+        fi
+        
+        echo 'complete -W "'$MNMGTCOMMANDS'"' $SCRIPT_NAME > /etc/bash_completion.d/${SCRIPT_BASE}
+        echo 'complete -W "'$MNCLICOMMANDS'"' $COIN_CLI    > /etc/bash_completion.d/${COIN_CLI}
+        
+        echo
+        echo -e "${D}Bash-completion configuration file for ${SCRIPT_NAME}: ${P}/etc/bash_completion.d/${SCRIPT_BASE}${D}.${N}"
+        echo -e "${D}Bash-completion configuration file for ${COIN_CLI}: ${P}/etc/bash_completion.d/${COIN_CLI}${D}.${N}"
+
+        if [[ -f $DUPMN_EXEC ]] && [[ $DUPMN_ENABLE == "true" ]]; then
+            echo 'complete -W "'$DUPMNCOMMANDS'"' $DUPMN_NAME > /etc/bash_completion.d/${DUPMN_NAME}
+
+            echo -e "${D}Bash-completion configuration file for dupmn: ${P}/etc/bash_completion.d/${DUPMN_NAME}${D}.${N}"
+        fi    
+        echo
+        echo -e "${Y}Finished Bash-completion commands installation and configuration.${N}"  
+        echo
+        if [[ -f $DUPMN_EXEC ]] && [[ $DUPMN_ENABLE == "true" ]]; then
+            echo -e "${D}To use bash-completion type ${C}${SCRIPT_NAME}${N}, ${C}${COIN_CLI}${N} or ${C}${DUPMN_NAME}${N} (followed by a space) and press the ${C}tab-key${N} multiple times.${N}"
+        else
+            echo -e "${D}To use bash-completion type ${C}${SCRIPT_NAME}${N} or ${C}${COIN_CLI}${N} (followed by a space) and press the ${C}tab-key${N} multiple times.${N}"
+        fi
+        echo -e "${D}This will show a selection of available commands (use help to show all commands).${N}"        
+        echo -e "${D}Type the first letter(s) of a command and press tab-key again to autocomplete the command.${N}"
+        echo
+        echo -e "${Y}Bash-completion commands will be available next time you logon.${N}"
+    else
+        echo
+        echo -e "${Y}Installation of bash-completion commands skipped.${N}"
+    fi
+}
+
+
 # Replace a sting in the masternode config file
 function replace() {
     echo
@@ -2064,8 +2169,8 @@ function replace() {
     fi
     
     showconf    
-}
-
+}    
+   
 
 # Extract function
 function extract() {
@@ -2204,6 +2309,7 @@ if [[ $ARG1 == "dupmn" ]]; then
         echo -e "${Y}Sorry, dupmn has not been enabled for $NODE_NAME masternodes.${N}"
     else
         install_dupmn
+        dupmn-bash-completion
         create_dupmn_config
         load_dupmn_profile
     fi
@@ -2238,6 +2344,7 @@ if [[ $ARG1 == "update"           ]]; then VALIDCMD="true"; update_binaries     
 if [[ $ARG1 == "addnodes"         ]]; then VALIDCMD="true"; download_addnodes           ; fi
 if [[ $ARG1 == "createswap"       ]]; then VALIDCMD="true"; create_swapfile             ; fi
 if [[ $ARG1 == "optimize"         ]]; then VALIDCMD="true"; ssd_optimizations           ; fi
+if [[ $ARG1 == "bashcompletion"   ]]; then VALIDCMD="true"; bash-completion             ; fi
 
 
 # Development options (not listed when displaying help)
@@ -2254,6 +2361,7 @@ if [[ $ARG1 == "swapfile"         ]]; then VALIDCMD="true"; create_swapfile     
 if [[ $ARG1 == "ssd"              ]]; then VALIDCMD="true"; ssd_optimizations           ; fi
 if [[ $ARG1 == "monitor_small"    ]]; then VALIDCMD="true"; monitor_small               ; fi
 if [[ $ARG1 == "alias"            ]]; then VALIDCMD="true"; add_alias                   ; fi
+if [[ $ARG1 == "dupmncompletion"  ]]; then VALIDCMD="true"; dupmn-bash-completion       ; fi
 
 
 # Change to originating folder
