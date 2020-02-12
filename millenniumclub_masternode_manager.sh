@@ -4,7 +4,7 @@
 #########################################################################################################
 # Creator: Eddy Erkel                                                                                   #
 # Discord: Eddy#6547                                                                                    #
-# Date   : January, 2020                                                                                #
+# Date   : February, 2020                                                                               #
 # Github : https://github.com/EddyErkel/                                                                #
 #                                                                                                       #
 # Disclamer:                                                                                            #
@@ -38,7 +38,7 @@
 
 
 # Script version
-VERSION=0.6
+VERSION=0.7
 
 
 # Donation addresses
@@ -201,6 +201,7 @@ function display_disclaimer() {
 VALIDCMD="false"                                    # Set value for valid command option check
 DATE_TIME="`date +%Y-%m-%d\ %H:%M:%S`"              # Set date and time variable
 FILE_DATE="`date +%Y%m%d_%H%M%S`"                   # Set date and time variable for use with filename (no spaces)
+SWAP_FILE="/swap.img"								# Set swap file name and path
 ARG1=$1                                             # First argument
 ARG2=$2                                             # Second argument
 ARG3=$3                                             # Third argument
@@ -285,7 +286,7 @@ function display_help() {
     echo -e "${C}bashcompletion         ${D}: Add bash-completion commands${N}"
     echo -e "${C}showconf               ${D}: Display contents of $COIN_CONFIG${N}" 
     echo -e "${C}replace [strA] [strB]  ${D}: Replace 'string A' with 'string B' in $COIN_CONFIG${N}"
-    echo -e "${C}createswap             ${D}: Create swap file (not recommended for SSD)${N}"
+    echo -e "${C}createswap             ${D}: Create swap file${N}"
     echo -e "${C}optimize               ${D}: Enable SSD optimizations${N}"
     if [[ $DUPMN_ENABLE == "true" ]]; then
         echo -e "${C}dupmn                  ${D}: Install or update dupmn${N}"
@@ -626,53 +627,122 @@ function install_fail2ban() {
 }
 
 
-# Create swapfile
+# Create swap file
+# https://help.ubuntu.com/community/SwapFaq
 function create_swapfile() {
     echo
     echo
     echo  
     echo -e "${G}CREATE SWAP SPACE${N}"
-    if [ ! -f /swapfile ]; then
+	echo
+	
+	# Check if swap has already been enabled
+	SWAP=$(swapon --show --noheadings | awk '{ print $3 }')
+	
+	if [ -z "$SWAP" ]; then
+		echo -e "${D}For recommended swap file sizes please check 'https://help.ubuntu.com/community/SwapFaq#How_much_swap_do_I_need.3F'.${N}"
         echo
-        echo -e "${D}Do you want to create a swapfile? (Recommended when not using SSD) [Y/n]${N}"
+        echo -e "${D}Do you want to create a swap file? (Recommended for HDD, optional for SSD) [Y/n]${N}"
         read -s -n1 SELECTION
 
         if [[ $SELECTION == @("Y"|"y"|"") ]]; then
-            echo
-            echo -e "${D}Please enter swap size or press enter for 2GB swapfile. [2GB]${N}"
+			echo
+			
+			# Calculate swap file size
+			MEM=$(grep MemTotal /proc/meminfo | awk '{print $2 / 1024 / 1024 }')
+			SWAP=$(awk -v var="$MEM" 'BEGIN{print sqrt(var);}' | awk '{print ($0-int($0)<0.499)?int($0):int($0)+1}')
+			SWAP="${SWAP}G"
+			
+            echo -e "${D}Please enter swap size or press enter for recommended ${SWAP}B swap file size. [$SWAP]${N}"
             read SWAP_SIZE
   
+			while [[ "${SWAP_SIZE: -1}" != @("M"|"G"|"") ]]; do
+				echo -e "${D}Please enter correct swap file size, by adding trailing M or G, or press enter for recommended ${SWAP}B swap file size. [$SWAP]${N}"
+				read SWAP_SIZE			
+			done
+
             if [[ "$SWAP_SIZE" == "" ]]; then
-                SWAP_SIZE="2G"
+                SWAP_SIZE="$SWAP"
             fi
-         
+
             echo
-            echo -e "${D}Creating $SWAP_SIZE swapfile, this may take a few minutes...${N}"
-            fallocate -l $SWAP_SIZE /swapfile
-            chmod 600 /swapfile
-            mkswap /swapfile
-            swapon /swapfile
+            echo -e "${D}Creating ${SWAP_SIZE}B swap file $SWAP_FILE, this may take a few minutes...${N}"
+			echo
+			
+			# Create swap file
+            fallocate -l ${SWAP_SIZE} $SWAP_FILE
+		
+			# Set root only permssions for swap file
+            chmod 600 $SWAP_FILE
+
+			# Display swap file
+			ls -lh $SWAP_FILE
+			
+			echo
+			
+			# Set swap file as Linux swap area
+            mkswap $SWAP_FILE
+			
+			echo
+			
+			# Enable swap
+            swapon $SWAP_FILE
+			
             if [ $? -eq 0 ]; then
-                cp /etc/fstab /etc/fstab.bak
-                echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
-                sysctl vm.swappiness=10
-                sysctl vm.vfs_cache_pressure=50
-                cp /etc/sysctl.conf /etc/sysctl.conf.bak
-                echo 'vm.swappiness=10' | tee -a /etc/sysctl.conf
-                echo 'vm.vfs_cache_pressure=50' | tee -a /etc/sysctl.conf
+				TIMESTAMP="`date +%Y%m%d_%H%M%S`" 
+				
+				# Create backup copy of /etc/fstab
+                cp /etc/fstab /etc/fstab.$TIMESTAMP
+				
+				# Create backup copy of /etc/sysctl.conf
+                cp /etc/sysctl.conf /etc/sysctl.conf.$TIMESTAMP
+				
+				# Delete swap file entry if already exists in /etc/fstab
+				sed -i "/${SWAP_FILE/\//} none swap sw 0 0/d" /etc/fstab
+				
+				# Define swap file entry in /etc/fstab
+				echo "$SWAP_FILE none swap sw 0 0" | tee -a /etc/fstab
+
+				echo
+
+				# Delete current swappiness
+				sed -i '/vm.swappiness/d' /etc/sysctl.conf
+				
+				# Add swappiness
+                echo 'vm.swappiness=10' >> /etc/sysctl.conf
+				
+				# Activate swappiness
+                sysctl -w vm.swappiness=10
+
+				echo
+				
+				# Delete current vfs_cache_pressure
+				sed -i '/vm.vfs_cache_pressure/d' /etc/sysctl.conf
+				
+				# Add vfs_cache_pressure
+				echo "vm.vfs_cache_pressure=50" >> /etc/sysctl.conf
+
+				# Activate vfs_cache_pressure
+				sysctl -w vm.vfs_cache_pressure=50
+				
                 echo
-                echo -e "${Y}Swapfile was created successfully.${N}"
+                echo -e "${Y}Swap was created and enabled successfully:${N}"
+				free -h
+				echo
+				swapon --show
             else
                 echo
                 echo -e "${R}Operation not permitted! Swap could not be created.${N}"
             fi
         else
             echo
-            echo -e "${Y}Swapfile creation skipped.${N}"
+            echo -e "${Y}Swap file creation skipped.${N}"
         fi
     else
-        echo
-        echo -e "${Y}Swapfile already exists.${N}"
+        echo -e "${Y}Swap has already been enabled:${N}"
+		free -h
+		echo
+		swapon --show
     fi
 }
 
@@ -684,23 +754,27 @@ function ssd_optimizations() {
     echo  
     echo -e "${G}OPTIMIZATIONS FOR SSD USAGE${N}"
     echo
-    echo -e "${D}This will set swappiness value, disable access time logging and enabe TRIM support.${N}"
+    echo -e "${D}This will set swappiness value, set vfs_cache_pressure value, disable access time logging and enabe TRIM support.${N}"
     echo 
     echo -e "${D}Do you want to enable optimizations for SSD usage? (Recommended when using SSD) [Y/n]${N}"
     read -s -n1 SELECTION    
     if [[ $SELECTION == @("Y"|"y"|"") ]]; then
         echo
-        # Set swappiness to avoid using swapping as much as possible
-        echo -e "${D}Set swappiness (0=minimize swap, 100=always swap).${N}"
+		# Create backup copy of /etc/fstab
+		TIMESTAMP="`date +%Y%m%d_%H%M%S`" 
+		cp /etc/sysctl.conf /etc/sysctl.conf.$TIMESTAMP  
+
+		# Set swappiness to avoid using swapping as much as possible
+		# https://www.kernel.org/doc/Documentation/sysctl/vm.txt
+		CURRENTSWAPPINESS=$(sysctl -n vm.swappiness)
+        echo -e "${D}Set swappiness (minimize=0, maximize=100, default=60, currently defined=$CURRENTSWAPPINESS).${N}"
         echo -e "${D}Please enter swappiness value. [0]${N}"
         read SWAPPINESS
 
         if [[ "$SWAPPINESS" == "" ]]; then
             SWAPPINESS="0"
         fi
-        
-        SWAPPINESS_NEW="vm.swappiness=$SWAPPINESS"
-        
+      
         echo -e "${D}Define swappiness in /etc/sysctl.conf.${N}"
         # Delete current swappiness 
         sed -i '/vm.swappiness/d' /etc/sysctl.conf
@@ -709,19 +783,42 @@ function ssd_optimizations() {
         echo
         # Activate swappiness
         echo -e "${D}Activate swappiness.${N}"
-        sysctl vm.swappiness=$SWAPPINESS 
+        sysctl -w vm.swappiness=$SWAPPINESS 
         echo   
+		
+
+        # Set vfs_cache_pressure to avoid using swapping as much as possible
+		# https://www.kernel.org/doc/Documentation/sysctl/vm.txt
+		CURRENTCACHEPRESSURE=$(sysctl -n vm.vfs_cache_pressure)
+        echo -e "${D}Set vfs_cache_pressure (minimize=0, maximize=1000, default=100, currently defined=$CURRENTCACHEPRESSURE).${N}"
+        echo -e "${D}Please enter vfs_cache_pressure value. [200]${N}"
+        read CACHEPRESSURE
+
+        if [[ "$CACHEPRESSURE" == "" ]]; then
+            CACHEPRESSURE="200"
+        fi
+        
+        CACHEPRESSURE_NEW="vm.vfs_cache_pressure=$CACHEPRESSURE"
+        echo -e "${D}Define cache pressure in /etc/sysctl.conf.${N}"
+        # Delete current vfs_cache_pressure
+        sed -i '/vm.vfs_cache_pressure/d' /etc/sysctl.conf
+        # Add vfs_cache_pressure
+		echo "vm.vfs_cache_pressure=$CACHEPRESSURE" >> /etc/sysctl.conf
+		echo
+		# Activate vfs_cache_pressure
+		sysctl -w vm.vfs_cache_pressure=$CACHEPRESSURE
+		echo
         
         # Disable access time logging
         echo -e "${D}Disable access time logging.${N}"
         echo
         # Create backup copy of fstab
-        echo -e "${D}Backup fstab to /etc/fstab.$FILE_DATE.${N}"
-        mv /etc/fstab /etc/fstab.$FILE_DATE
+        echo -e "${D}Backup fstab to /etc/fstab.$TIMESTAMP.${N}"
+        mv /etc/fstab /etc/fstab.$TIMESTAMP
         echo
         echo -e "${D}Add 'noatime' to /etc/fstab.${N}"
         # Add noatime to fstab
-        awk '!/^#/ && ($2 != "swap") && ($3 != "swap") { if(!match($4, "noatime")) $4=$4",noatime" } 1' /etc/fstab.$FILE_DATE > /etc/fstab
+        awk '!/^#/ && ($2 != "swap") && ($3 != "swap") { if(!match($4, "noatime")) $4=$4",noatime" } 1' /etc/fstab.$TIMESTAMP > /etc/fstab
         echo
         
         # Enable TRIM support
@@ -1640,7 +1737,7 @@ function monitor_small() {
                 PRINTWIDTH=$(expr $(/usr/bin/tput cols) - ${#BLOCK} - 12)   # Calculate max number of characters on one line
                 PRINTSTATUS=$(echo $STATUS | cut -c -$PRINTWIDTH)
 
-                echo -ne "$EXITCODE | $BLOCKCOUNT | $PRINTSTATUS"
+                echo -ne "${D}$EXITCODE | $BLOCKCOUNT | $PRINTSTATUS${N}"
 
                 i=0                
                 while  [ -z "$INPUT" ] && [ $i -lt 5 ] ;  do
@@ -1668,7 +1765,7 @@ function monitor_small() {
                 fi
             done;
       
-            echo -e "$EXITCODE | $BLOCKCOUNT | $PRINTSTATUS"
+            echo -e "${D}$EXITCODE | $BLOCKCOUNT | $PRINTSTATUS${N}"
             echo
             
 
@@ -1723,7 +1820,7 @@ function monitor_large {
             echo
             echo -e '${D}This screen will refresh every $SLEEP seconds...${N}'
             echo
-            echo -e '${Y}Press a key to stop monitoring.${D}'
+            echo -e '${Y}Press a key to stop monitoring.${N}'
             echo"
         bash -ic "$CMD";
         # Exit if a key or ^C is pressed or when an error occurs.
@@ -1986,9 +2083,9 @@ function installation_summary() {
         echo
         echo -e "${D}Variables defined in $COIN_CONFIG:${N}"
         echo -e "${D}- port                      : ${P}$COIN_PORT${N}"        
-        echo -e "${D}- bind                      : ${P}$NODE_IP"
-        echo -e "${D}- externalip                : ${P}$EXT_IP"
-        echo -e "${D}- masternodeaddr            : ${P}$MN_ADDR"    
+        echo -e "${D}- bind                      : ${P}$NODE_IP${N}"
+        echo -e "${D}- externalip                : ${P}$EXT_IP${N}"
+        echo -e "${D}- masternodeaddr            : ${P}$MN_ADDR${N}"    
         echo -e "${D}- masternodeprivkey         : ${P}$COINKEY${N}"
         echo
     fi
@@ -2357,7 +2454,6 @@ if [[ $ARG1 == "system"           ]]; then VALIDCMD="true"; update_system       
 if [[ $ARG1 == "dependencies"     ]]; then VALIDCMD="true"; install_dependencies        ; fi
 if [[ $ARG1 == "firewall"         ]]; then VALIDCMD="true"; enable_firewall $ARG2 $ARG3 ; fi # Args: 'Coin Port' 'Node Name'
 if [[ $ARG1 == "fail2ban"         ]]; then VALIDCMD="true"; install_fail2ban            ; fi
-if [[ $ARG1 == "swapfile"         ]]; then VALIDCMD="true"; create_swapfile             ; fi
 if [[ $ARG1 == "ssd"              ]]; then VALIDCMD="true"; ssd_optimizations           ; fi
 if [[ $ARG1 == "monitor_small"    ]]; then VALIDCMD="true"; monitor_small               ; fi
 if [[ $ARG1 == "alias"            ]]; then VALIDCMD="true"; add_alias                   ; fi
@@ -2378,3 +2474,16 @@ if [[ $VALIDCMD == "false" ]]; then
 else
     exit 0
 fi
+
+#########################################################################################################
+#                                            CREATOR NOTES                                              #
+#########################################################################################################
+
+# Spelling check					: cat ./scriptfilename | grep 'echo -e' | sed 's/^.*echo -e//' | grep -v '\\033\[1A\\' > spellingcheck.txt
+# Spelling check with line numbers	: cat ./scriptfilename | grep -n 'echo -e' | grep -v '\\033\[1A\\' | sed 's/:.*\ "/ /' > spellingcheck.txt
+
+# Todo someday maybe:   
+# - Remove option        
+# - Version check   
+# - Symbolic lync to script / copy script to /usr/local/bin
+# - Download latest release     
